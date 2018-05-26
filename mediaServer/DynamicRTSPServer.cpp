@@ -27,6 +27,9 @@ DynamicRTSPServer::createNew(UsageEnvironment& env, Port ourPort,
 			     UserAuthenticationDatabase* authDatabase,
 			     unsigned reclamationTestSeconds) {
   int ourSocket = setUpOurSocket(env, ourPort); // ½¨Á¢ socket
+
+  printf("-------------RTSP socket %d------------- \r\n", ourSocket);
+
   if (ourSocket == -1) return NULL;
 
   return new DynamicRTSPServer(env, ourSocket, ourPort, authDatabase, reclamationTestSeconds);

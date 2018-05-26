@@ -58,7 +58,7 @@ public:
     // a result > 0 means: this is the duration of a bounded session
 
   virtual void noteLiveness();
-    // called whenever a client - accessing this media - notes liveness.
+    // called whenever a client - accessing this media - notes liveness.每当有客户访问这个媒体时都会被记录下来 - 记录活跃度。
     // The default implementation does nothing, but subclasses can redefine this - e.g., if you
     // want to remove long-unused "ServerMediaSession"s from the server.
 

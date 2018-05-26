@@ -420,7 +420,7 @@ long our_random() {
   return i;
 }
 #endif
-
+// Ã»¿´¶®
 u_int32_t our_random32() {
   /* Return a 32-bit random number.
      Because "our_random()" returns a 31-bit random number, we call it a second

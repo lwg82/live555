@@ -37,6 +37,8 @@ OnDemandServerMediaSubsession
   } else {
     // Make sure RTP ports are even-numbered:
     fInitialPortNum = (initialPortNum+1)&~1;
+
+	fprintf(stderr, "-----RTP port num %d ------- \r\n", fInitialPortNum);
   }
   gethostname(fCNAME, sizeof fCNAME);
   fCNAME[sizeof fCNAME-1] = '\0'; // just in case
