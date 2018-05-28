@@ -257,12 +257,15 @@ public: // should be protected, but some old compilers complain otherwise
     Boolean fIsMulticast, fStreamAfterSETUP;
     unsigned char fTCPStreamIdCount; // used for (optional) RTP/TCP
     Boolean usesTCPTransport() const { return fTCPStreamIdCount > 0; }
+
     unsigned fNumStreamStates;
+
+	// streamState数组来维护一个rtsp流的多路，数组的每一个元素代表一路流，内部通过streamtoken表示
     struct streamState {
       ServerMediaSubsession* subsession;
       int tcpSocketNum;
       void* streamToken;
-    } * fStreamStates;
+    } * fStreamStates; // 根据 subsession 数量创建该数组
   };
 
 protected: // redefined virtual functions

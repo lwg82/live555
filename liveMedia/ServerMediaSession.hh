@@ -91,7 +91,7 @@ private:
   friend class ServerMediaSubsessionIterator;
   ServerMediaSubsession* fSubsessionsHead;
   ServerMediaSubsession* fSubsessionsTail;
-  unsigned fSubsessionCounter;
+  unsigned fSubsessionCounter;   // subsession ¼ÆÊýÆ÷
 
   char* fStreamName;
   char* fInfoSDPString;

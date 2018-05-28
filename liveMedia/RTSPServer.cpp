@@ -1217,7 +1217,7 @@ static void parseTransportHeader(char const* buf,
 	unsigned char& rtcpChannelId // if TCP
 ) {
 	// Initialize the result parameters to default values:
-	streamingMode = RTP_UDP;
+	streamingMode = RTP_UDP; //默认使用UDP方式传输RTP  
 	streamingModeString = NULL;
 	destinationAddressStr = NULL;
 	destinationTTL = 255;
@@ -1241,7 +1241,7 @@ static void parseTransportHeader(char const* buf,
 	while (*fields == ' ') ++fields;
 	char* field = strDupSize(fields);
 	while (sscanf(fields, "%[^;\r\n]", field) == 1) {
-		if (strcmp(field, "RTP/AVP/TCP") == 0) {
+		if (strcmp(field, "RTP/AVP/TCP") == 0) { //使用了RTP OVER TCP 方式传输  
 			streamingMode = RTP_TCP;
 		}
 		else if (strcmp(field, "RAW/RAW/UDP") == 0 ||
@@ -1333,7 +1333,7 @@ void RTSPServer::RTSPClientSession
 			if (fOurServerMediaSession == NULL) {
 				// We're accessing the "ServerMediaSession" for the first time.
 				fOurServerMediaSession = sms;
-				fOurServerMediaSession->incrementReferenceCount();
+				fOurServerMediaSession->incrementReferenceCount(); //增加session的引用计数  
 			}
 			else if (sms != fOurServerMediaSession) {
 				// The client asked for a stream that's different from the one originally requested for this stream id.  Bad request:
@@ -1344,26 +1344,29 @@ void RTSPServer::RTSPClientSession
 
 		if (fStreamStates == NULL) {
 			// This is the first "SETUP" for this session.  Set up our array of states for all of this session's subsessions (tracks):
+			// 获取subsession 数量，并计数
 			fNumStreamStates = fOurServerMediaSession->numSubsessions();
-			fStreamStates = new struct streamState[fNumStreamStates];
+			fStreamStates = new struct streamState[fNumStreamStates]; // 创建 streamState对象,每个对象代表一路流
 
 			ServerMediaSubsessionIterator iter(*fOurServerMediaSession);
 			ServerMediaSubsession* subsession;
 			for (unsigned i = 0; i < fNumStreamStates; ++i) {
 				subsession = iter.next();
-				fStreamStates[i].subsession = subsession;
+				fStreamStates[i].subsession = subsession; // 为每一路流赋值，
 				fStreamStates[i].tcpSocketNum = -1; // for now; may get set for RTP-over-TCP streaming
 				fStreamStates[i].streamToken = NULL; // for now; it may be changed by the "getStreamParameters()" call that comes later
 			}
 		}
 
+		//查找track id 对应的subsession是否存在，不存在则进行错误处理  
 		// Look up information for the specified subsession (track):
 		ServerMediaSubsession* subsession = NULL;
 		unsigned trackNum;
 		if (trackId != NULL && trackId[0] != '\0') { // normal case
 			for (trackNum = 0; trackNum < fNumStreamStates; ++trackNum) {
-				subsession = fStreamStates[trackNum].subsession;
-				if (subsession != NULL && strcmp(trackId, subsession->trackId()) == 0) break;
+				subsession = fStreamStates[trackNum].subsession; // 获取当前setup时的 session
+				if (subsession != NULL && strcmp(trackId, subsession->trackId()) == 0) 
+					break;
 			}
 			if (trackNum >= fNumStreamStates) {
 				// The specified track id doesn't exist, so this request fails:
@@ -1392,6 +1395,7 @@ void RTSPServer::RTSPClientSession
 			subsession->deleteStream(fOurSessionId, token);
 		}
 
+		
 		// Look for a "Transport:" header in the request string, to extract client parameters:
 		StreamingMode streamingMode;
 		char* streamingModeString = NULL; // set when RAW_UDP streaming is specified
@@ -1399,10 +1403,12 @@ void RTSPServer::RTSPClientSession
 		u_int8_t clientsDestinationTTL;
 		portNumBits clientRTPPortNum, clientRTCPPortNum;
 		unsigned char rtpChannelId, rtcpChannelId;
+		//处理Transport头部，获取传输相关信息(1.1)  
 		parseTransportHeader(fullRequestStr, streamingMode, streamingModeString,
 			clientsDestinationAddressStr, clientsDestinationTTL,
 			clientRTPPortNum, clientRTCPPortNum,
 			rtpChannelId, rtcpChannelId);
+
 		if ((streamingMode == RTP_TCP && rtpChannelId == 0xFF) ||
 			(streamingMode != RTP_TCP && ourClientConnection->fClientOutputSocket != ourClientConnection->fClientInputSocket)) {
 			// An anomolous situation, caused by a buggy client.  Either:
@@ -1417,6 +1423,7 @@ void RTSPServer::RTSPClientSession
 		Port clientRTPPort(clientRTPPortNum);
 		Port clientRTCPPort(clientRTCPPortNum);
 
+		//处理Range头部(可选)  
 		// Next, check whether a "Range:" or "x-playNow:" header is present in the request.
 		// This isn't legal, but some clients do this to combine "SETUP" and "PLAY":
 		double rangeStart = 0.0, rangeEnd = 0.0;
@@ -1442,6 +1449,8 @@ void RTSPServer::RTSPClientSession
 		netAddressBits destinationAddress = 0;
 		u_int8_t destinationTTL = 255;
 #ifdef RTSP_ALLOW_CLIENT_DESTINATION_SETTING
+
+		//RTP数据发送到destination指定的地址，而不是正在通信的客户端。为了安全考虑，一般应禁止该功能(将上面的宏定义去掉)  
 		if (clientsDestinationAddressStr != NULL) {
 			// Use the client-provided "destination" address.
 			// Note: This potentially allows the server to be used in denial-of-service
@@ -1465,15 +1474,18 @@ void RTSPServer::RTSPClientSession
 #ifdef HACK_FOR_MULTIHOMED_SERVERS
 		ReceivingInterfaceAddr = SendingInterfaceAddr = sourceAddr.sin_addr.s_addr;
 #endif
-
+		// 生成 streamToken, OnDemandServerMediaSubsession::getStreamParameters
 		subsession->getStreamParameters(fOurSessionId, ourClientConnection->fClientAddr.sin_addr.s_addr,
 			clientRTPPort, clientRTCPPort,
 			fStreamStates[trackNum].tcpSocketNum, rtpChannelId, rtcpChannelId,
 			destinationAddress, destinationTTL, fIsMulticast,
 			serverRTPPort, serverRTCPPort,
-			fStreamStates[trackNum].streamToken);
+			fStreamStates[trackNum].streamToken); // 生成 streamToken
+
 		SendingInterfaceAddr = origSendingInterfaceAddr;
 		ReceivingInterfaceAddr = origReceivingInterfaceAddr;
+
+		//下面是组装响应包  
 
 		AddressString destAddrStr(destinationAddress);
 		AddressString sourceAddrStr(sourceAddr);

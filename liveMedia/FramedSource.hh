@@ -37,7 +37,9 @@ public:
 				  unsigned numTruncatedBytes,
 				  struct timeval presentationTime,
 				  unsigned durationInMicroseconds);
+
   typedef void (onCloseFunc)(void* clientData);
+
   void getNextFrame(unsigned char* to, unsigned maxSize,
 		    afterGettingFunc* afterGettingFunc,
 		    void* afterGettingClientData,

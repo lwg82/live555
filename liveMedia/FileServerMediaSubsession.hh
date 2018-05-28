@@ -36,7 +36,7 @@ protected: // we're a virtual base class
   virtual ~FileServerMediaSubsession();
 
 protected:
-  char const* fFileName;
+  char const* fFileName; // 视频文件名称  test.264
   u_int64_t fFileSize; // if known
 };
 

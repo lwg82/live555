@@ -105,7 +105,7 @@ ServerMediaSession::addSubsession(ServerMediaSubsession* subsession) {
 	fSubsessionsTail = subsession;
 
 	subsession->fParentSession = this;
-	subsession->fTrackNumber = ++fSubsessionCounter;
+	subsession->fTrackNumber = ++fSubsessionCounter; // 增加 subsession 计数器
 	return True;
 }
 
