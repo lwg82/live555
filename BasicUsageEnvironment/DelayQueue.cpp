@@ -104,7 +104,7 @@ DelayQueueEntry::~DelayQueueEntry() {
 }
 
 void DelayQueueEntry::handleTimeout() {
-  delete this;
+  delete this; // ？？ 怎么删除了自己
 }
 
 
@@ -132,7 +132,7 @@ void DelayQueue::addEntry(DelayQueueEntry* newEntry) {
     cur = cur->fNext;
   }
 
-  cur->fDeltaTimeRemaining -= newEntry->fDeltaTimeRemaining;
+  cur->fDeltaTimeRemaining -= newEntry->fDeltaTimeRemaining; // 根据间隔时间来插入的
 
   // Add "newEntry" to the queue, just before "cur":
   newEntry->fNext = cur;
@@ -203,17 +203,18 @@ void DelayQueue::synchronize() {
   _EventTime timeNow = TimeNow();
   if (timeNow < fLastSyncTime) {
     // The system clock has apparently gone back in time; reset our sync time and return:
+	// 系统时间比异步时间快了，重置异步时间
     fLastSyncTime  = timeNow;
     return;
   }
-  DelayInterval timeSinceLastSync = timeNow - fLastSyncTime;
+  DelayInterval timeSinceLastSync = timeNow - fLastSyncTime; // 间隔时间
   fLastSyncTime = timeNow;
 
   // Then, adjust the delay queue for any entries whose time is up:
   DelayQueueEntry* curEntry = head();
   while (timeSinceLastSync >= curEntry->fDeltaTimeRemaining) {
     timeSinceLastSync -= curEntry->fDeltaTimeRemaining;
-    curEntry->fDeltaTimeRemaining = DELAY_ZERO;
+    curEntry->fDeltaTimeRemaining = DELAY_ZERO; // 置0
     curEntry = curEntry->fNext;
   }
   curEntry->fDeltaTimeRemaining -= timeSinceLastSync;

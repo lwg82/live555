@@ -22,7 +22,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 
 ////////// A subclass of DelayQueueEntry,
 //////////     used to implement BasicTaskScheduler0::scheduleDelayedTask()
-
+// 延迟任务实体类
 class AlarmHandler: public DelayQueueEntry {
 public:
   AlarmHandler(TaskFunc* proc, void* clientData, DelayInterval timeToDelay)
@@ -31,7 +31,7 @@ public:
 
 private: // redefined virtual functions
   virtual void handleTimeout() {
-    (*fProc)(fClientData);
+    (*fProc)(fClientData); // 调用函数指针
     DelayQueueEntry::handleTimeout();
   }
 

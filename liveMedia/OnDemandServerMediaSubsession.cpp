@@ -62,8 +62,8 @@ char const*
 OnDemandServerMediaSubsession::sdpLines() {
 	if (fSDPLines == NULL) {
 		// We need to construct a set of SDP lines that describe this
-		// subsession (as a unicast stream).  To do so, we first create
-		// dummy (unused) source and "RTPSink" objects,
+		// subsession (as a unicast streamµ¥²¥Á÷).  To do so, we first create
+		// dummyÐéÄâµÄ (unused) source and "RTPSink" objects,
 		// whose parameters we use for the SDP lines:
 		unsigned estBitrate;
 		FramedSource* inputSource = createNewStreamSource(0, estBitrate);

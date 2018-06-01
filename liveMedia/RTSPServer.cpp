@@ -718,6 +718,7 @@ void RTSPServer::RTSPClientConnection::handleRequestBytes(int newBytesRead) {
 		fprintf(stderr, "---------------------\r\n");
 		fprintf(stderr, "RTSP request\r\n%s \r\n", fRequestBuffer);
 
+		// rtsp://192.168.1.1/urlPreSuffix/urlSuffix
 		Boolean parseSucceeded = parseRTSPRequestString((char*)fRequestBuffer, fLastCRLF + 2 - fRequestBuffer,
 			cmdName, sizeof cmdName,
 			urlPreSuffix, sizeof urlPreSuffix,
@@ -1591,6 +1592,7 @@ void RTSPServer::RTSPClientSession
 	char const* cmdName,
 	char const* urlPreSuffix, char const* urlSuffix,
 	char const* fullRequestStr) {
+	// rtsp://192.168.1.1/urlPreSuffix/urlSuffix
 	// This will either be:
 	// - a non-aggregated operation, if "urlPreSuffix" is the session (stream)非聚合操作，如果“urlPreSuffix”是会话（流）名称，“urlSuffix”是子会话（曲目）名称
 	//   name and "urlSuffix" is the subsession (track) name, or

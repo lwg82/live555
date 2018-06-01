@@ -62,7 +62,7 @@ void BasicUsageEnvironment0::setResultMsg(MsgString msg1, MsgString msg2,
   setResultMsg(msg1, msg2);
   appendToResultMsg(msg3);
 }
-// 获取错误吗和错误信息
+// 先将 msg 复制到fResultMsgBuffer， 再根据 err 错误号获取错误内容，再将错误内容追加到fResultMsgBuffer
 void BasicUsageEnvironment0::setResultErrMsg(MsgString msg, int err) {
   setResultMsg(msg);
 
@@ -84,7 +84,7 @@ void BasicUsageEnvironment0::setResultErrMsg(MsgString msg, int err) {
 
 
 
-// 复制错误信息
+// 将信息追加到 fResultMsgBuffer 缓存
 void BasicUsageEnvironment0::appendToResultMsg(MsgString msg) {
   char* curPtr = &fResultMsgBuffer[fCurBufferSize];
   unsigned spaceAvailable = fBufferMaxSize - fCurBufferSize;
@@ -94,13 +94,31 @@ void BasicUsageEnvironment0::appendToResultMsg(MsgString msg) {
   if (msgLength > spaceAvailable-1) {
     msgLength = spaceAvailable-1;
   }
+  /*
+   原型： 　void *memmove( void* dest, const void* src, size_tcount );
 
+#include<string.h>
+
+由src所指内存区域复制count个字节到dest所指内存区域。
+
+src和dest所指内存区域可以重叠，但复制后dest内容会被更改。函数返回指向dest的指针。
+
+Copies the values of num bytes from the location pointed by source to the memory block pointed by destination. Copying takes place as if an intermediate buffer were used, allowing the destination and source to overlap.
+
+memmove的处理措施：
+
+（1）当源内存的首地址等于目标内存的首地址时，不进行任何拷贝
+
+（2）当源内存的首地址大于目标内存的首地址时，实行正向拷贝
+
+（3）当源内存的首地址小于目标内存的首地址时，实行反向拷贝
+  */
   memmove(curPtr, (char*)msg, msgLength);
   fCurBufferSize += msgLength;
   fResultMsgBuffer[fCurBufferSize] = '\0';
 }
 
-// 错误信息写入文件
+// 错误信息写入 stderr
 void BasicUsageEnvironment0::reportBackgroundError() {
   fputs(getResultMsg(), stderr);
 }

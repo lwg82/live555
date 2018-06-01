@@ -91,3 +91,5 @@ int main(int argc, char** argv) {
 
   return 0; // only to prevent compiler warning
 }
+
+// https://www.wolfcstech.com/2017/08/30/live555_src_analysis_infrasture/

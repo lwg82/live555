@@ -108,7 +108,7 @@ FramedSource* H264VideoFileServerMediaSubsession::createNewStreamSource(unsigned
   if (fileSource == NULL) return NULL;
   fFileSize = fileSource->fileSize();
 
-  // Create a framer for the Video Elementary Stream:
+  // Create a framer for the Video Elementary Stream£¨ÊÓÆµÆôÊ¼Á÷£©:
   return H264VideoStreamFramer::createNew(envir(), fileSource);
 }
 
